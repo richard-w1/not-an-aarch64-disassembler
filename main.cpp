@@ -13,35 +13,26 @@ struct Instruction {
 
 unordered_map<string, Instruction> loadInstructions(const string& filename) {
     unordered_map<string, Instruction> instructions;
-    
     ifstream file(filename);
     string line;
-    
-    // skip header
     getline(file, line);
-    
     while (getline(file, line)) {
         stringstream ss(line);
         string mnemonic, format, width, binary;
-        
         getline(ss, mnemonic, ',');
         getline(ss, format, ',');
         getline(ss, width, ',');
         getline(ss, binary, ',');
-        
         instructions[binary] = {mnemonic, format, stoi(width)};
     }
-    
     return instructions;
 }
 
 string disassemble(const string& bin, const unordered_map<string, Instruction>& instructions) {
-    // try every exact width
     for (const auto& [opcode, instr] : instructions) {
         if (bin.substr(0, instr.width) == opcode) {
             string fmt = instr.format;
             string mnemonic = instr.mnemonic;
-
             try {
                 if (fmt == "R") {
                     int Rd = stoi(bin.substr(27, 5), nullptr, 2);
@@ -77,21 +68,3 @@ string disassemble(const string& bin, const unordered_map<string, Instruction>& 
     }
     return "idk...";
 }
-int main() {
-    auto instructions = loadInstructions("Operands.csv");
-    
-    string input;
-    while (true) {
-        cout << "32 bit binary instruction: ";
-        cin >> input;
-
-        if (input.size() != 32) {
-            cerr << "has to be 32 bits" << endl;
-            continue;
-        }
-
-        cout << "Assembly: " << disassemble(input, instructions) << endl;
-    }
-    return 0;
-}
-
